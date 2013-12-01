@@ -50,9 +50,12 @@ comment = string "(*" >> manyTill anyChar (Prim.try (string "*)")) >>= (return .
 readHtSExp :: String -> String
 readHtSExp input = case parse elem "HtSExp" input of
     Left err -> "No match: " ++ show err
-    Right val -> show val
-
---r = putStrLn . readHtSExp
+    Right val -> convertToHtml val
 
 main :: IO ()
-main = getContents >>= putStrLn . readHtSExp
+main = getContents >>= (putStrLn . readHtSExp)
+
+convertToHtml :: HtSExp -> String
+convertToHtml htSExp = undefined
+
+
