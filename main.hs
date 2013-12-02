@@ -61,7 +61,9 @@ convertToHtml (Comment c) = "<!-- " ++ c ++ "-->"
 
 -- <canvas id="hoge"></canvas> になる不具合
 convertToHtml' :: HtSExp -> String
-convertToHtml' (Elem e xs) = "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
+convertToHtml' (Elem e xs) = case others == [] of
+                               True  -> "<" ++ e ++ concat (map flattenAttr attrs) ++ " />"
+                               False -> "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
     where (attrs, others) = part isAttr xs
           flattenAttr (Attr attr val) = " " ++ attr ++ "=\"" ++ val ++ "\""
 
