@@ -3,15 +3,13 @@ import Text.Parsec.String
 import Text.Parsec.Prim as Prim
 import Control.Monad
 
-import Prelude hiding (elem)
-
 data HtSExp = Elem String [HtSExp] | Attr String String | Str String | Comment String deriving (Show, Read, Eq)
 
 htSExp :: Parser HtSExp
-htSExp = Prim.try elem <|> Prim.try attr <|> Prim.try str <|> Prim.try comment
+htSExp = Prim.try element <|> Prim.try attr <|> Prim.try str <|> Prim.try comment
 
-elem :: Parser HtSExp
-elem = do
+element :: Parser HtSExp
+element = do
   char '('
   spaces
   element <- many alphaNum
@@ -43,8 +41,8 @@ comment :: Parser HtSExp
 comment = string "(*" >> manyTill anyChar (Prim.try (string "*)")) >>= (return . Comment)
 
 readHtSExp :: String -> String
-readHtSExp input = case parse elem "HtSExp" input of
-    Left err -> "No match: " ++ show err
+readHtSExp input = case parse element "HtSExp" input of
+    Left err -> error $ "No match: " ++ show err
     Right val -> convertToHtml val
 
 convertToHtml :: HtSExp -> String
@@ -55,7 +53,7 @@ convertToHtml (Str s) = s --"\"" ++ s ++ "\""
 convertToHtml (Comment c) = "<!-- " ++ c ++ "-->"
 
 convertToHtml' :: HtSExp -> String
-convertToHtml' (Elem e xs) = case others == [] of
+convertToHtml' (Elem e xs) = case others == [] && not (e `elem` elemlist) of
                                True  -> "<" ++ e ++ concat (map flattenAttr attrs) ++ " />"
                                False -> "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
     where (attrs, others) = part isAttr xs
@@ -69,6 +67,8 @@ isAttr _ = False
 part :: (a -> Bool) -> [a] -> ([a],[a])
 part f xs = (filter f xs, filter (not.f) xs)
 
+elemlist :: [String]
+elemlist = ["script"]
 
 main :: IO ()
 main = getContents >>= (putStrLn . readHtSExp)
