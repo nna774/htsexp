@@ -1,9 +1,6 @@
 import Text.Parsec
-import Text.Parsec.Char
 import Text.Parsec.String
 import Text.Parsec.Prim as Prim
-import Text.Parsec.Token
-import Text.ParserCombinators.Parsec
 import Control.Monad
 
 import Prelude hiding (elem)
@@ -18,8 +15,6 @@ elem = do
   char '('
   spaces
   element <- many alphaNum
---  spaces
---  skipMany1 space
   es <- many $ Prim.try (Prim.try spaces >> htSExp)
   spaces
   char ')'
@@ -59,13 +54,12 @@ convertToHtml e@(Elem _ _) = convertToHtml' e
 convertToHtml (Str s) = s --"\"" ++ s ++ "\""
 convertToHtml (Comment c) = "<!-- " ++ c ++ "-->"
 
--- <canvas id="hoge"></canvas> になる不具合
 convertToHtml' :: HtSExp -> String
 convertToHtml' (Elem e xs) = case others == [] of
                                True  -> "<" ++ e ++ concat (map flattenAttr attrs) ++ " />"
                                False -> "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
     where (attrs, others) = part isAttr xs
-          flattenAttr (Attr attr val) = " " ++ attr ++ "=\"" ++ val ++ "\""
+          flattenAttr (Attr att val) = " " ++ att ++ "=\"" ++ val ++ "\""
 
 isAttr :: HtSExp -> Bool
 isAttr (Attr _ _) = True
