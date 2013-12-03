@@ -53,7 +53,7 @@ convertToHtml (Str s) = s --"\"" ++ s ++ "\""
 convertToHtml (Comment c) = "<!-- " ++ c ++ "-->"
 
 convertToHtml' :: HtSExp -> String
-convertToHtml' (Elem e xs) = case others == [] && not (e `elem` elemlist) of
+convertToHtml' (Elem e xs) = case others == [] && e `notElem` elemlist of
                                True  -> "<" ++ e ++ concat (map flattenAttr attrs) ++ " />"
                                False -> "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
     where (attrs, others) = part isAttr xs
