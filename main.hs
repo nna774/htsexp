@@ -1,7 +1,7 @@
 import Text.Parsec
 import Text.Parsec.String
 import Text.Parsec.Prim as Prim
-import Control.Monad
+import Data.List
 
 data HtSExp = Elem String [HtSExp] | Attr String String | Str String | Comment String deriving (Show, Read, Eq)
 
@@ -12,11 +12,11 @@ element :: Parser HtSExp
 element = do
   char '('
   spaces
-  element <- many alphaNum
+  element_ <- many alphaNum
   es <- many $ Prim.try (Prim.try spaces >> htSExp)
   spaces
   char ')'
-  return $ Elem element es
+  return $ Elem element_ es
 
 attr :: Parser HtSExp
 attr = do
@@ -56,16 +56,12 @@ convertToHtml' :: HtSExp -> String
 convertToHtml' (Elem e xs) = case others == [] && e `notElem` elemlist of
                                True  -> "<" ++ e ++ concat (map flattenAttr attrs) ++ " />"
                                False -> "<" ++ e ++ concat (map flattenAttr attrs) ++ ">" ++ concat (map convertToHtml others) ++ "</" ++ e ++ ">"
-    where (attrs, others) = part isAttr xs
+    where (attrs, others) = partition isAttr xs
           flattenAttr (Attr att val) = " " ++ att ++ "=\"" ++ val ++ "\""
 
 isAttr :: HtSExp -> Bool
 isAttr (Attr _ _) = True
 isAttr _ = False
-
--- やばそう
-part :: (a -> Bool) -> [a] -> ([a],[a])
-part f xs = (filter f xs, filter (not.f) xs)
 
 elemlist :: [String]
 elemlist = ["script"]
