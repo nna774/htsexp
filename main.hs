@@ -50,7 +50,7 @@ comment :: Parser HtSExp
 comment = string "(*" >> manyTill anyChar (Prim.try (string "*)")) >>= (return . Comment)
 
 readHtSExp :: String -> String
-readHtSExp input = case parse (element >>= (\x -> eof >> return x)) "HtSExp" input of
+readHtSExp input = case parse (element >>= (\x -> space >> eof >> return x) ) "HtSExp" input of
     Left err -> error $ "No match: " ++ show err
     Right val -> convertToHtml val
 
