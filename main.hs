@@ -30,8 +30,17 @@ attr = do
   char ')'
   return $ Attr attri value
 
+escapedChars :: Parser Char
+escapedChars = char '\\' >> oneOf "\\\"nrt" >>= (\x -> return $ case x of 
+                                                                  '\\' -> x
+                                                                  '"'  -> x
+                                                                  'n'  -> '\n'
+                                                                  'r'  -> '\r'
+                                                                  't'  -> '\t'
+                                                )
+
 quote :: Parser String
-quote = char '"' >> manyTill anyChar (char '"') 
+quote = char '"' >> many (escapedChars <|> noneOf "\"\\") >>= (\x -> char '"' >> return x)
 
 str :: Parser HtSExp
 str = quote >>= (return . Str)
