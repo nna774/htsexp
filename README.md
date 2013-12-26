@@ -25,6 +25,9 @@ Buakko
 
     $ ghc -o htsexp main.hs -O3
 
+をやったあとにできた htsexp をパスの通ったところに置いてください.
+
+
 # 使い方
 
     $ htsexp hoge.htsxep > hoge.html
