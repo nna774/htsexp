@@ -18,9 +18,9 @@ data HtSExp = Elem String [HtSExp] | Attr String String | Str String | Comment S
 data Options = Help | OutPut String | Version | License deriving (Eq, Show, Read)
 
 options :: [OptDescr Options]
-options = [ Option ['h','?'] ["help"] (NoArg Help) "display this help."
-          , Option ['o'] ["output"] (ReqArg (OutPut . read) "OUTPUT")  "output file name."
-          , Option ['v'] ["version"] (NoArg Version) "display version of this program."
+options = [ Option "h?" ["help"] (NoArg Help) "display this help."
+          , Option "o" ["output"] (ReqArg (OutPut . read) "OUTPUT")  "output file name."
+          , Option "v" ["version"] (NoArg Version) "display version of this program."
           , Option [] ["license"] (NoArg License) "show license."
           ]
 
@@ -127,7 +127,7 @@ main = do
   else do
       let filename = args !! 0 
       readFile filename
-      let outputFilename = maybe (if isSuffixOf filename ".htsexp" then "" else "") id (find isOutput opts >>= return . unOutput)
+      let outputFilename = Data.Maybe.fromMaybe (liftM unOutput (find isOutput opts))
       return ()
 
 
